@@ -73,48 +73,47 @@ centos | almalinux)
 esac
 
 echo -e "2. Check NodeJS Installation."
-if ! [ -x "$(command -v node)" ]; then
-  echo " - NodeJS is not installed. Installing NodeJS. It may take a while."
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash >/dev/null
-  export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-  
-  # Source the correct profile file
-  if [ -f "$HOME/.zshrc" ]; then
-    source ~/.zshrc
-  elif [ -f "$HOME/.bash_profile" ]; then
-    source ~/.bash_profile
-  elif [ -f "$HOME/.profile" ]; then
-    source ~/.profile
-  else
-    source ~/.bashrc
-  fi
 
-  nvm install 20 --lts >/dev/null
-  echo " - NodeJS installed successfully."
-else
-  NODE_VERSION=$(node -v | cut -d 'v' -f 2 | cut -d '.' -f 1)
-  if [ "$NODE_VERSION" -lt 18 ]; then
-    echo " - NodeJS version is below 18. Upgrading to latest LTS version."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash >/dev/null
-    export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-    # Source the correct profile file
-    if [ -f "$HOME/.zshrc" ]; then
-      source ~/.zshrc
-    elif [ -f "$HOME/.bash_profile" ]; then
-      source ~/.bash_profile
-    elif [ -f "$HOME/.profile" ]; then
-      source ~/.profile
-    else
-      source ~/.bashrc
-    fi
-    nvm install 20 --lts >/dev/null
-    echo " - NodeJS upgraded successfully."
+if ! command -v nvm &>/dev/null; then
+  echo " - NVM not found. Installing..."
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash >/dev/null
+
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+  # Reload shell config
+  if [ -n "$ZSH_VERSION" ]; then
+    source "$HOME/.zshrc"
   else
-    echo " - NodeJS version $NODE_VERSION is compatible."
+    source "$HOME/.bashrc"
   fi
 fi
+
+if ! command -v node &>/dev/null; then
+  echo " - NodeJS is not installed. Installing latest LTS..."
+  nvm install --lts >/dev/null
+  nvm alias default $(nvm version-remote --lts)
+  nvm use $(nvm version-remote --lts)
+  echo " - NodeJS installed successfully: $(node -v)"
+  exit 0
+fi
+
+CURRENT_VERSION=$(node -v | cut -d 'v' -f 2)
+LATEST_VERSION=$(nvm version-remote --lts | sed 's/v//')
+
+echo " - Current NodeJS version: $CURRENT_VERSION"
+echo " - Latest LTS NodeJS version: $LATEST_VERSION"
+
+if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+  echo " - Upgrading NodeJS to LTS version $LATEST_VERSION..."
+  nvm install --lts >/dev/null
+  nvm alias default $(nvm version-remote --lts)
+  nvm use $(nvm version-remote --lts)
+  echo " - NodeJS successfully upgraded to $(node -v)"
+else
+  echo " - NodeJS is already up to date."
+fi
+
 
 echo -e "3. Check PM2 Installation."
 if ! command -v pm2 &> /dev/null

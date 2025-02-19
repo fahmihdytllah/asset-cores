@@ -1,10 +1,15 @@
+#################################################
+#          JAGO TRAFFIC (Jago Code)             #
+#                                               #
+#  Website       : https://traffic.jagocode.id  #
+#  Documentation : https://docs.jagocode.id     #
+#  Last Update   : 19 Feb 2025 12:56            #
+#################################################
+
 #!/bin/bash
 
-set -e # Exit immediately if a command exits with a non-zero status
-## $1 could be empty, so we need to disable this check
-#set -u # Treat unset variables as an error and exit
-set -o pipefail # Cause a pipeline to return the status of the last command that exited with a non-zero status
-
+set -e 
+set -o pipefail 
 
 VERSION="1.0"
 OS_TYPE=$(grep -w "ID" /etc/os-release | cut -d "=" -f 2 | tr -d '"')
@@ -77,17 +82,11 @@ echo -e "2. Check NodeJS Installation."
 if ! command -v nvm &>/dev/null; then
   echo " - NVM not found. Installing..."
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash >/dev/null
-
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-  # Reload shell config
-  if [ -n "$ZSH_VERSION" ]; then
-    source "$HOME/.zshrc"
-  else
-    source "$HOME/.bashrc"
-  fi
 fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 if ! command -v node &>/dev/null; then
   echo " - NodeJS is not installed. Installing latest LTS..."
@@ -114,6 +113,16 @@ else
   echo " - NodeJS is already up to date."
 fi
 
+# Source the correct profile file
+if [ -f "$HOME/.zshrc" ]; then
+  source ~/.zshrc
+elif [ -f "$HOME/.bash_profile" ]; then
+  source ~/.bash_profile
+elif [ -f "$HOME/.profile" ]; then
+  source ~/.profile
+else
+  source ~/.bashrc
+fi
 
 echo -e "3. Check PM2 Installation."
 if ! command -v pm2 &> /dev/null
@@ -129,7 +138,7 @@ fi
 echo -e "4. Check Jago Traffic Installation."
 if ! [ -x "$(command -v jagotraffic)" ]; then
   echo " - Jago Traffic is not installed. Installing Jago Traffic Worker. It may take a while."
-  npm i --global jagotraffic >/dev/null
+  npm i -g jagotraffic >/dev/null
   echo " - Jago Traffic installed successfully."
 else
   echo " - Jago Traffic is installed..."

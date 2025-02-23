@@ -1,0 +1,1 @@
+const assetsCorePath=document.documentElement.getAttribute('data-assets-core-path');AsciinemaPlayer.create(assetsCorePath+'preview/jagotraffic.cast',document.getElementById('preview-jagotraffic'),{autoplay:true,loop:true,startAt:7.5,speed:1.8,poster:'npt:1:50',});

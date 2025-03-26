@@ -3,7 +3,7 @@
 #                                               #
 #  Website       : https://traffic.jagocode.id  #
 #  Documentation : https://docs.jagocode.id     #
-#  Last Update   : 19 Feb 2025 12:56            #
+#  Last Update   : 27 Mar 2025 03:27            #
 #################################################
 
 #!/bin/bash
@@ -128,7 +128,7 @@ echo -e "3. Check PM2 Installation."
 if ! command -v pm2 &> /dev/null
 then
     echo "PM2 is not installed. Installing PM2..."
-    npm install -g pm2
+    npm install -g pm2 cross-env
     echo "PM2 successfully installed."
 else
     echo "PM2 is already installed."
